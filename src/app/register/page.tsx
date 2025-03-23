@@ -160,10 +160,18 @@ export default function RegisterPage() {
       borderRadius="xl" 
       boxShadow="lg"
       bg="white"
+      color="gray.800" 
+      className="login-form"
       opacity={formActive ? 1 : 0}
       transform={formActive ? "none" : "translateY(20px)"}
       transition="all 0.5s ease"
       animation={shake ? `${wiggle} 0.5s ease` : "none"}
+      sx={{
+        "& input, & button": {
+          bg: "#FFF3E0",
+          color: "gray.800",
+        }
+      }}
     >
       <VStack spacing={6} align="center">
         <Heading 

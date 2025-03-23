@@ -1,0 +1,60 @@
+/* Login page specific styles */
+.login-form {
+  background-color: white !important;
+  color: #1A202C !important;
+}
+
+.login-form input, 
+.login-form button {
+  background-color: #FFF3E0 !important;
+  color: #1A202C !important;
+}
+
+body, 
+html, 
+main,
+.login-page-main {
+  background-color: #ffffff !important;
+  color: #1A202C !important;
+}
+
+/* Force light-mode for login page */
+html[data-theme="dark"] .login-form,
+.dark .login-form,
+.dark-mode .login-form {
+  background-color: white !important;
+  color: #1A202C !important;
+  border-color: #E2E8F0 !important;
+}
+
+/* Ensure the inputs/buttons respect light mode */
+html[data-theme="dark"] .login-form input,
+html[data-theme="dark"] .login-form button,
+.dark .login-form input,
+.dark .login-form button,
+.dark-mode .login-form input,
+.dark-mode .login-form button {
+  background-color: #FFF3E0 !important;
+  color: #1A202C !important;
+  border-color: #E2E8F0 !important;
+}
+
+/* Override Chakra UI theming */
+.chakra-ui-dark .login-form {
+  background-color: white !important;
+  color: #1A202C !important;
+}
+
+.chakra-ui-dark .login-form input,
+.chakra-ui-dark .login-form button {
+  background-color: #FFF3E0 !important;
+  color: #1A202C !important;
+}
+
+/* Ensure background for login page regardless of theme */
+.dark .login-page-main,
+.dark-mode .login-page-main,
+html[data-theme="dark"] .login-page-main,
+.chakra-ui-dark .login-page-main {
+  background-color: #ffffff !important;
+} 
