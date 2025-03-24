@@ -249,7 +249,7 @@ export default function StudentStats({ students, solutions }: StudentStatsProps)
               >
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
-                <YAxis />
+                <YAxis domain={[0, 'auto']} allowDataOverflow={false} />
                 <Tooltip />
                 <Legend />
                 <Bar dataKey="total" name="Toplam Çözülen" fill="#8884d8" />

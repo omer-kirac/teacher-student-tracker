@@ -421,9 +421,9 @@ const NAV_ITEMS: Array<NavItem> = [
     label: 'Sınıflar',
     children: [
       {
-        label: 'Sınıflarım',
+        label: 'Tüm Sınıflarım',
         subLabel: 'Tüm sınıflarınızı görüntüleyin',
-        href: '/classes',
+        href: '/classes-all',
       },
       {
         label: 'Sınıf Sıralaması',

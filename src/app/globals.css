@@ -1,8 +1,15 @@
 @import "tailwindcss";
 
+/* Light mode tema değişkenleri */
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --card-bg: #ffffff;
+  --card-border: #e5e5e5;
+  --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --border-radius: 0.5rem;
+  --font-size-base: 16px;
+  --transition-speed: 0.2s;
 }
 
 @theme inline {
@@ -12,15 +19,173 @@
   --font-mono: var(--font-geist-mono);
 }
 
+/* Dark mode tema değişkenleri */
+.dark, 
+.dark-mode,
+[data-theme="dark"],
+html[data-theme="dark"] {
+  --background: #111827 !important; /* gray.900 */
+  --foreground: #f3f4f6 !important; /* gray.100 */
+  --card-bg: #1f2937 !important; /* gray.800 */
+  --card-border: #374151 !important; /* gray.700 */
+  --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* System dark mode desteği */
 @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  :root:not(.light):not([data-theme="light"]) {
+    --background: #111827;
+    --foreground: #f3f4f6;
+    --card-bg: #1f2937;
+    --card-border: #374151;
+    --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+  :root {
+    --font-size-base: 14px;
+    --border-radius: 0.375rem;
+  }
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Ana arka plan ve metin renkleri */
+html, 
+body, 
+main,
+#__next,
+.chakra-ui-light,
+.chakra-ui-dark {
+  background-color: var(--background) !important;
+  color: var(--foreground) !important;
+  font-family: var(--font-sans, Arial, Helvetica, sans-serif);
+  font-size: var(--font-size-base);
+  transition: background-color var(--transition-speed) ease, 
+              color var(--transition-speed) ease,
+              border-color var(--transition-speed) ease;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* Doküman boyunca arka plan rengini zorla */
+.dark *:not(button):not(input):not(select):not(textarea):not(a):not(.chakra-button):not([style*="background"]),
+.dark-mode *:not(button):not(input):not(select):not(textarea):not(a):not(.chakra-button):not([style*="background"]),
+[data-theme="dark"] *:not(button):not(input):not(select):not(textarea):not(a):not(.chakra-button):not([style*="background"]),
+.dark [data-theme="dark"],
+.dark-mode,
+.dark div,
+.dark main,
+.dark nav,
+.dark section,
+.dark header,
+.dark footer,
+.dark article,
+.dark aside,
+[data-theme="dark"] {
+  background-color: var(--background) !important;
+  color: var(--foreground) !important;
+}
+
+/* Root elementleri için doğrudan stil */
+.dark-mode body,
+.dark-mode html,
+.dark-mode #__next,
+.dark-mode main,
+.dark body,
+.dark html,
+.dark #__next,
+.dark main,
+[data-theme="dark"] body,
+[data-theme="dark"] html,
+[data-theme="dark"] #__next,
+[data-theme="dark"] main {
+  background-color: var(--background) !important;
+  color: var(--foreground) !important;
+}
+
+/* Better focus state for accessibility */
+*:focus-visible {
+  outline: 2px solid #3b82f6; /* blue.400 */
+  outline-offset: 2px;
+}
+
+/* Custom scrollbar for desktop browsers */
+@media (min-width: 768px) {
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: var(--background);
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: #4b5563; /* gray.600 - dark mode için daha uyumlu */
+    border-radius: 4px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: #6b7280; /* gray.500 - hover için daha açık */
+  }
+}
+
+/* Form elements and buttons for better dark mode contrast */
+.dark button, 
+.dark input, 
+.dark select, 
+.dark textarea,
+.dark-mode button,
+.dark-mode input,
+.dark-mode select,
+.dark-mode textarea,
+[data-theme="dark"] button,
+[data-theme="dark"] input,
+[data-theme="dark"] select,
+[data-theme="dark"] textarea {
+  color: #f3f4f6; /* gray.100 */
+  border-color: #374151; /* gray.700 */
+}
+
+/* Touch device overrides for better interaction */
+@media (hover: none) {
+  /* Increase tap target sizes */
+  button, a {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Adjust padding for inputs on mobile */
+  input, select, textarea {
+    padding: 0.75rem !important;
+  }
+}
+
+/* Chakra UI konteynerlerinde ve bileşenlerinde zorunlu arka plan ayarları */
+.dark .chakra-container,
+.dark-mode .chakra-container,
+[data-theme="dark"] .chakra-container,
+.dark .chakra-card,
+.dark-mode .chakra-card,
+[data-theme="dark"] .chakra-card,
+.dark .chakra-stack,
+.dark-mode .chakra-stack,
+[data-theme="dark"] .chakra-stack,
+.dark .chakra-box,
+.dark-mode .chakra-box,
+[data-theme="dark"] .chakra-box,
+.dark .chakra-ui-dark,
+.dark-mode .chakra-ui-dark,
+[data-theme="dark"] .chakra-ui-dark {
+  background-color: var(--background) !important;
+  color: var(--foreground) !important;
 }

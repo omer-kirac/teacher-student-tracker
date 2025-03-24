@@ -48,12 +48,18 @@ import {
   MenuButton,
   MenuList,
   MenuItem,
+  Skeleton,
+  SimpleGrid,
+  useColorModeValue,
+  Icon,
 } from '@chakra-ui/react';
 import { supabase } from '@/lib/supabase';
 import SolutionsChart from '@/components/SolutionsChart';
 import StudentStats from '@/components/StudentStats';
 import StudentRanking from '@/components/StudentRanking';
 import React from 'react';
+import { FiUsers, FiCheckCircle } from 'react-icons/fi';
+import EmptyStateIllustration from '@/components/EmptyStateIllustration';
 
 interface Student {
   id: string;
@@ -123,7 +129,7 @@ export default function ClassPage({ params }: { params: { id: string } }) {
 
   const router = useRouter();
   const toast = useToast();
-  const cancelRef = React.useRef<HTMLButtonElement>(null);
+  const cancelRef = React.useRef<any>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   // Öğrenciler için renk paleti oluştur
@@ -178,6 +184,8 @@ export default function ClassPage({ params }: { params: { id: string } }) {
         isClosable: true,
       });
       console.error('Error fetching class details:', error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -514,8 +522,31 @@ export default function ClassPage({ params }: { params: { id: string } }) {
 
   if (loading) {
     return (
-      <Container centerContent py={10}>
-        <Text>Yükleniyor...</Text>
+      <Container maxW="container.xl" py={8}>
+        <Flex direction="column" gap={6}>
+          {/* Header skeleton */}
+          <Box mb={8}>
+            <Skeleton height="28px" width="120px" mb={2} />
+            <Skeleton height="36px" width="300px" />
+          </Box>
+
+          {/* Tab skeleton */}
+          <Skeleton height="48px" borderRadius="md" mb={4} />
+
+          {/* Content skeleton */}
+          <Box borderWidth="1px" borderRadius="lg" p={6}>
+            <SimpleGrid columns={{ base: 1 }} spacing={4}>
+              {[1, 2, 3, 4, 5].map(i => (
+                <Skeleton 
+                  key={i} 
+                  height="60px" 
+                  borderRadius="md" 
+                  speed={1.2}
+                />
+              ))}
+            </SimpleGrid>
+          </Box>
+        </Flex>
       </Container>
     );
   }
@@ -548,83 +579,118 @@ export default function ClassPage({ params }: { params: { id: string } }) {
         <TabPanels>
           <TabPanel>
             {students.length === 0 ? (
-              <Box p={10} textAlign="center" borderWidth={1} borderRadius="md">
-                <Text mb={4}>Bu sınıfta henüz öğrenci bulunmuyor.</Text>
-                <Button colorScheme="blue" onClick={onStudentModalOpen}>
-                  İlk Öğrenciyi Ekleyin
-                </Button>
-              </Box>
+              <EmptyStateIllustration
+                title="Henüz öğrenci bulunmuyor"
+                message="Bu sınıfa öğrenci ekleyerek başlayın"
+                icon={<Icon as={FiUsers} boxSize={8} />}
+                buttonText="İlk Öğrenciyi Ekleyin"
+                onButtonClick={onStudentModalOpen}
+                type="student"
+              />
             ) : (
-              <Table variant="simple">
-                <Thead>
-                  <Tr>
-                    <Th>Öğrenci Adı</Th>
-                    <Th>Eklenme Tarihi</Th>
-                    <Th width="100px" textAlign="center">İşlemler</Th>
-                  </Tr>
-                </Thead>
-                <Tbody>
-                  {students.map((student) => (
-                    <Tr key={student.id}>
-                      <Td>
-                        <Flex align="center">
-                          <Box 
-                            width="32px" 
-                            height="32px" 
-                            borderRadius="full" 
-                            overflow="hidden" 
-                            mr={2}
-                            bg={student.photo_url ? "transparent" : studentColors[student.id]}
-                            display="flex"
-                            alignItems="center"
-                            justifyContent="center"
-                            color="white"
-                            fontWeight="bold"
-                          >
-                            {student.photo_url ? (
-                              <img 
-                                src={student.photo_url} 
-                                alt={student.name}
-                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                              />
-                            ) : (
-                              student.name.charAt(0).toUpperCase()
-                            )}
-                          </Box>
-                          <Text>{student.name}</Text>
-                        </Flex>
-                      </Td>
-                      <Td>{new Date(student.created_at).toLocaleDateString()}</Td>
-                      <Td>
-                        <Flex justify="center" gap={2}>
-                          <Button 
-                            size="sm" 
-                            colorScheme="blue"
-                            onClick={() => handleEditStudent(student)}
-                          >
-                            Düzenle
-                          </Button>
-                          <Button 
-                            size="sm" 
-                            colorScheme="red"
-                            onClick={() => {
-                              setSelectedStudent(student);
-                              onDeleteDialogOpen();
-                            }}
-                          >
-                            Sil
-                          </Button>
-                        </Flex>
-                      </Td>
+              <Box
+                borderWidth="1px"
+                borderRadius="lg"
+                overflow="hidden"
+                p={4}
+                mb={8}
+                boxShadow="md"
+                bg={useColorModeValue('white', 'gray.800')}
+                transition="all 0.3s"
+                _hover={{ boxShadow: 'lg', transform: 'translateY(-2px)' }}
+              >
+                <Table variant="simple">
+                  <Thead>
+                    <Tr>
+                      <Th>Öğrenci Adı</Th>
+                      <Th>Eklenme Tarihi</Th>
+                      <Th width="100px" textAlign="center">İşlemler</Th>
                     </Tr>
-                  ))}
-                </Tbody>
-              </Table>
+                  </Thead>
+                  <Tbody>
+                    {students.map((student, index) => (
+                      <Tr 
+                        key={student.id}
+                        _hover={{ bg: useColorModeValue('gray.50', 'gray.700') }}
+                        transition="background 0.2s"
+                      >
+                        <Td>
+                          <Flex align="center">
+                            <Box 
+                              width="32px" 
+                              height="32px" 
+                              borderRadius="full" 
+                              overflow="hidden" 
+                              mr={2}
+                              bg={student.photo_url ? "transparent" : studentColors[student.id]}
+                              display="flex"
+                              alignItems="center"
+                              justifyContent="center"
+                              color="white"
+                              fontWeight="bold"
+                            >
+                              {student.photo_url ? (
+                                <img 
+                                  src={student.photo_url} 
+                                  alt={student.name}
+                                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                />
+                              ) : (
+                                student.name.charAt(0).toUpperCase()
+                              )}
+                            </Box>
+                            <Text>{student.name}</Text>
+                          </Flex>
+                        </Td>
+                        <Td>{new Date(student.created_at).toLocaleDateString()}</Td>
+                        <Td>
+                          <Flex justify="center" gap={2}>
+                            <Button 
+                              size="sm" 
+                              colorScheme="blue"
+                              onClick={() => handleEditStudent(student)}
+                              _hover={{ transform: 'translateY(-2px)', shadow: 'sm' }}
+                              _active={{ transform: 'translateY(0)', shadow: 'none' }}
+                              transition="all 0.2s"
+                            >
+                              Düzenle
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              colorScheme="red"
+                              onClick={() => {
+                                setSelectedStudent(student);
+                                onDeleteDialogOpen();
+                              }}
+                              _hover={{ transform: 'translateY(-2px)', shadow: 'sm' }}
+                              _active={{ transform: 'translateY(0)', shadow: 'none' }}
+                              transition="all 0.2s"
+                            >
+                              Sil
+                            </Button>
+                          </Flex>
+                        </Td>
+                      </Tr>
+                    ))}
+                  </Tbody>
+                </Table>
+              </Box>
             )}
           </TabPanel>
           <TabPanel>
             <Box>
-              <SolutionsChart students={students} solutions={solutions} />
+              {solutions.length === 0 ? (
+                <EmptyStateIllustration
+                  title="Henüz çözüm kaydı bulunmuyor"
+                  message="Öğrencilerin çözdüğü soruları kaydedin"
+                  icon={<Icon as={FiCheckCircle} boxSize={8} />}
+                  buttonText="Çözüm Ekle"
+                  onButtonClick={onSolutionModalOpen}
+                  type="solution"
+                />
+              ) : (
+                <SolutionsChart students={students} solutions={solutions} />
+              )}
             </Box>
           </TabPanel>
           <TabPanel>

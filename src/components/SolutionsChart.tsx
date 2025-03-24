@@ -25,8 +25,17 @@ import {
   Button, 
   Avatar, 
   HStack,
-  useColorModeValue
+  useColorModeValue,
+  SimpleGrid,
+  Stat,
+  StatLabel,
+  StatNumber,
+  StatHelpText,
+  Icon,
+  Center,
 } from '@chakra-ui/react';
+import { FiBarChart2, FiArrowUp, FiArrowDown } from 'react-icons/fi';
+import EmptyStateIllustration from './EmptyStateIllustration';
 
 interface Student {
   id: string;
@@ -105,9 +114,70 @@ const CustomLegend = ({ payload, students, studentColors }: any) => {
   );
 };
 
+// Define the CustomTooltip component
+interface CustomTooltipProps {
+  active?: boolean;
+  payload?: any[];
+  label?: string;
+  students?: Student[]; // Add students prop
+}
+
+const CustomTooltip = ({ active, payload, label, students = [] }: CustomTooltipProps) => {
+  if (active && payload && payload.length) {
+    // Only show students with values > 0
+    const nonZeroEntries = payload.filter((entry: any) => (entry.value as number) > 0);
+    const chartBg = useColorModeValue('white', 'gray.800');
+    
+    return (
+      <Box 
+        bg={chartBg}
+        p={3} 
+        borderRadius="md" 
+        boxShadow="md"
+        border="1px solid"
+        borderColor="gray.200"
+        minWidth="200px"
+      >
+        <Text fontWeight="bold" mb={2}>{label}</Text>
+        {nonZeroEntries.map((entry: any, index: number) => {
+          const studentId = entry.dataKey as string;
+          const student = students.find((s: Student) => s.id === studentId);
+          if (!student) return null;
+          
+          return (
+            <Flex 
+              key={index} 
+              align="center" 
+              mb={index < nonZeroEntries.length - 1 ? 2 : 0}
+            >
+              <Avatar 
+                size="xs" 
+                name={student.name}
+                src={student.photo_url}
+                bg={entry.color as string}
+                mr={2}
+              />
+              <Text color={entry.color as string}>
+                {student.name}: <strong>{entry.value} soru</strong>
+              </Text>
+            </Flex>
+          );
+        })}
+      </Box>
+    );
+  }
+  
+  return null;
+};
+
 export default function SolutionsChart({ students, solutions }: ChartProps) {
   const [timeFrame, setTimeFrame] = useState<'all' | '30days' | '7days'>('all');
   const [chartType, setChartType] = useState<'line' | 'area'>('line');
+  
+  // Remove the global window assignment
+  // if (typeof window !== 'undefined') {
+  //   window.currentStudents = students;
+  // }
   
   // Grafiği oluşturmak için veriyi hazırla
   const chartData = useMemo(() => {
@@ -180,26 +250,84 @@ export default function SolutionsChart({ students, solutions }: ChartProps) {
     return result;
   }, [students, solutions]);
 
-  // Legend için tema renkleri
-  const legendBg = useColorModeValue('white', 'gray.800');
+  // Use our accessible color hook for better contrast
+  const chartBg = useColorModeValue('white', 'gray.800');
+  const chartBorder = useColorModeValue('gray.200', 'gray.700');
+  const textColor = useColorModeValue('gray.800', 'gray.100');
+  const gridColor = useColorModeValue('#eee', '#444');
+  
+  // Calculate weekly statistics
+  const weeklyStats = useMemo(() => {
+    return students.map(student => {
+      const studentSolutions = solutions.filter(s => s.student_id === student.id);
+      
+      // Get total of all solutions
+      const total = studentSolutions.reduce((sum, s) => sum + s.solved_questions, 0);
+      
+      // Calculate current week solutions
+      const thisWeekStart = new Date();
+      thisWeekStart.setDate(thisWeekStart.getDate() - 7);
+      const thisWeekSolutions = studentSolutions.filter(s => new Date(s.date) >= thisWeekStart);
+      const weeklyTotal = thisWeekSolutions.reduce((sum, s) => sum + s.solved_questions, 0);
+      
+      // Calculate previous week solutions for comparison
+      const prevWeekStart = new Date(thisWeekStart);
+      prevWeekStart.setDate(prevWeekStart.getDate() - 7);
+      const prevWeekSolutions = studentSolutions.filter(s => {
+        const date = new Date(s.date);
+        return date >= prevWeekStart && date < thisWeekStart;
+      });
+      const prevWeekTotal = prevWeekSolutions.reduce((sum, s) => sum + s.solved_questions, 0);
+      
+      // Calculate change percentage
+      let changePercentage = 0;
+      if (prevWeekTotal > 0) {
+        changePercentage = Math.round(((weeklyTotal - prevWeekTotal) / prevWeekTotal) * 100);
+      } else if (weeklyTotal > 0) {
+        changePercentage = 100; // If previous week was 0, it's a 100% increase
+      }
+      
+      return {
+        studentId: student.id,
+        studentName: student.name,
+        total,
+        weeklyTotal,
+        prevWeekTotal,
+        changePercentage,
+        average: averages[student.id] || 0
+      };
+    }).sort((a, b) => b.weeklyTotal - a.weeklyTotal); // Sort by weekly total
+  }, [students, solutions, averages]);
 
-  if (chartData.length === 0 || students.length === 0) {
+  if (students.length === 0 || solutions.length === 0) {
     return (
-      <Box p={10} textAlign="center" borderWidth={1} borderRadius="md">
-        <Text>Henüz çözüm verisi bulunmuyor.</Text>
-      </Box>
+      <EmptyStateIllustration
+        title="Henüz veri bulunmuyor"
+        message="Öğrencilerin çözdüğü soruları kaydedin"
+        icon={<Icon as={FiBarChart2} boxSize={8} />}
+        type="solution"
+      />
     );
   }
 
   return (
-    <Box>
+    <Box
+      borderWidth="1px"
+      borderRadius="lg"
+      p={4}
+      bg={chartBg}
+      borderColor={chartBorder}
+    >
       <Flex justify="space-between" align="center" mb={6}>
-        <Heading size="md">Öğrenci Çözüm Grafiği</Heading>
+        <Heading size="md" color={textColor}>Çözüm Grafiği</Heading>
         <Flex gap={4}>
           <Select 
             value={timeFrame} 
             onChange={(e) => setTimeFrame(e.target.value as any)}
             width="160px"
+            borderColor={chartBorder}
+            _hover={{ borderColor: 'blue.400' }}
+            transition="all 0.2s"
           >
             <option value="all">Tüm Zamanlar</option>
             <option value="30days">Son 30 Gün</option>
@@ -210,12 +338,16 @@ export default function SolutionsChart({ students, solutions }: ChartProps) {
             <Button
               colorScheme={chartType === 'line' ? 'blue' : 'gray'}
               onClick={() => setChartType('line')}
+              _hover={{ transform: 'translateY(-1px)' }}
+              transition="all 0.2s"
             >
               Çizgi
             </Button>
             <Button
               colorScheme={chartType === 'area' ? 'blue' : 'gray'}
               onClick={() => setChartType('area')}
+              _hover={{ transform: 'translateY(-1px)' }}
+              transition="all 0.2s"
             >
               Alan
             </Button>
@@ -223,75 +355,32 @@ export default function SolutionsChart({ students, solutions }: ChartProps) {
         </Flex>
       </Flex>
       
-      <Box height="400px" mb={6}>
+      <Box
+        height="400px" 
+        mb={6}
+      >
         <ResponsiveContainer width="100%" height="100%">
           {chartType === 'line' ? (
             <LineChart
               data={chartData}
               margin={{ top: 10, right: 30, left: 0, bottom: 5 }}
             >
-              <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
+              <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
               <XAxis 
                 dataKey="date" 
-                tick={{ fill: '#666' }}
+                tick={{ fill: textColor }}
                 tickMargin={10}
+                stroke={chartBorder}
               />
               <YAxis 
-                tick={{ fill: '#666' }}
+                tick={{ fill: textColor }}
                 tickMargin={10}
+                domain={[0, 'auto']}
+                allowDataOverflow={false}
+                stroke={chartBorder}
               />
-              <Tooltip 
-                content={({ active, payload, label }) => {
-                  if (active && payload && payload.length) {
-                    // Sadece değeri 0'dan büyük olan öğrencileri göster
-                    const nonZeroEntries = payload.filter(entry => (entry.value as number) > 0);
-                    
-                    return (
-                      <Box 
-                        bg={legendBg}
-                        p={3} 
-                        borderRadius="md" 
-                        boxShadow="md"
-                        border="1px solid"
-                        borderColor="gray.200"
-                        minWidth="200px"
-                      >
-                        <Text fontWeight="bold" mb={2}>{label}</Text>
-                        {nonZeroEntries.map((entry, index) => {
-                          const studentId = entry.dataKey as string;
-                          const student = students.find(s => s.id === studentId);
-                          if (!student) return null;
-                          
-                          return (
-                            <Flex 
-                              key={index} 
-                              align="center" 
-                              mb={index < nonZeroEntries.length - 1 ? 2 : 0}
-                            >
-                              <Avatar 
-                                size="xs" 
-                                name={student.name}
-                                src={student.photo_url}
-                                bg={entry.color as string}
-                                mr={2}
-                              />
-                              <Text color={entry.color as string}>
-                                {student.name}: <strong>{entry.value} soru</strong>
-                              </Text>
-                            </Flex>
-                          );
-                        })}
-                      </Box>
-                    );
-                  }
-                  
-                  return null;
-                }}
-              />
-              <Legend 
-                content={<CustomLegend students={students} studentColors={studentColors} />}
-                height={60}
-              />
+              <Tooltip content={<CustomTooltip students={students} />} />
+              <Legend content={<CustomLegend students={students} studentColors={studentColors} />} height={60} />
               {students.map((student) => (
                 <Line
                   key={student.id}
@@ -324,68 +413,22 @@ export default function SolutionsChart({ students, solutions }: ChartProps) {
               data={chartData}
               margin={{ top: 10, right: 30, left: 0, bottom: 5 }}
             >
-              <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
+              <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
               <XAxis 
                 dataKey="date" 
-                tick={{ fill: '#666' }}
+                tick={{ fill: textColor }}
                 tickMargin={10}
+                stroke={chartBorder}
               />
               <YAxis 
-                tick={{ fill: '#666' }}
+                tick={{ fill: textColor }}
                 tickMargin={10}
+                domain={[0, 'auto']}
+                allowDataOverflow={false}
+                stroke={chartBorder}
               />
-              <Tooltip 
-                content={({ active, payload, label }) => {
-                  if (active && payload && payload.length) {
-                    // Sadece değeri 0'dan büyük olan öğrencileri göster
-                    const nonZeroEntries = payload.filter(entry => (entry.value as number) > 0);
-                    
-                    return (
-                      <Box 
-                        bg={legendBg}
-                        p={3} 
-                        borderRadius="md" 
-                        boxShadow="md"
-                        border="1px solid"
-                        borderColor="gray.200"
-                        minWidth="200px"
-                      >
-                        <Text fontWeight="bold" mb={2}>{label}</Text>
-                        {nonZeroEntries.map((entry, index) => {
-                          const studentId = entry.dataKey as string;
-                          const student = students.find(s => s.id === studentId);
-                          if (!student) return null;
-                          
-                          return (
-                            <Flex 
-                              key={index} 
-                              align="center" 
-                              mb={index < nonZeroEntries.length - 1 ? 2 : 0}
-                            >
-                              <Avatar 
-                                size="xs" 
-                                name={student.name}
-                                src={student.photo_url}
-                                bg={entry.color as string}
-                                mr={2}
-                              />
-                              <Text color={entry.color as string}>
-                                {student.name}: <strong>{entry.value} soru</strong>
-                              </Text>
-                            </Flex>
-                          );
-                        })}
-                      </Box>
-                    );
-                  }
-                  
-                  return null;
-                }}
-              />
-              <Legend 
-                content={<CustomLegend students={students} studentColors={studentColors} />}
-                height={60}
-              />
+              <Tooltip content={<CustomTooltip students={students} />} />
+              <Legend content={<CustomLegend students={students} studentColors={studentColors} />} height={60} />
               {students.map((student) => (
                 <Area
                   key={student.id}
@@ -403,54 +446,61 @@ export default function SolutionsChart({ students, solutions }: ChartProps) {
         </ResponsiveContainer>
       </Box>
       
-      {/* Öğrenci bazlı özet bilgiler */}
-      <Flex gap={4} flexWrap="wrap" justify="center">
-        {students.map(student => {
-          const studentSolutions = solutions.filter(s => s.student_id === student.id);
-          const total = studentSolutions.reduce((sum, s) => sum + s.solved_questions, 0);
-          const lastWeekSolutions = studentSolutions.filter(s => {
-            const date = new Date(s.date);
-            const weekAgo = new Date();
-            weekAgo.setDate(weekAgo.getDate() - 7);
-            return date >= weekAgo;
-          });
-          const lastWeekTotal = lastWeekSolutions.reduce((sum, s) => sum + s.solved_questions, 0);
-          
-          return (
-            <Box 
-              key={student.id} 
-              borderWidth={1} 
-              borderRadius="md" 
-              p={3}
-              borderColor={studentColors[student.id]}
-              boxShadow="sm"
-              width="200px"
+      {/* Weekly Stats Section */}
+      <Box
+        mt={8}
+        borderTopWidth="1px"
+        borderColor={chartBorder}
+        pt={6}
+      >
+        <Heading size="md" mb={4} color={textColor}>Haftalık İstatistikler</Heading>
+        <SimpleGrid columns={{ base: 1, md: 3 }} spacing={6}>
+          {weeklyStats.map((stat, index) => (
+            <Box
+              key={stat.studentId}
+              borderWidth="1px"
+              borderRadius="lg"
+              p={4}
+              borderColor={chartBorder}
+              bg={chartBg}
+              _hover={{ 
+                transform: 'translateY(-5px)', 
+                boxShadow: 'md', 
+                borderColor: studentColors[stat.studentId]
+              }}
+              transition="all 0.2s"
             >
-              <Flex justify="space-between" align="center" mb={2}>
-                <HStack>
-                  <Avatar 
-                    size="sm" 
-                    name={student.name} 
-                    src={student.photo_url}
-                    bg={studentColors[student.id]}
-                  />
-                  <Text fontWeight="bold">{student.name}</Text>
-                </HStack>
-                <Badge 
-                  colorScheme={lastWeekTotal > 0 ? "green" : "gray"}
-                  borderRadius="full"
-                  px={2}
-                >
-                  {lastWeekTotal > 0 ? "Aktif" : "Pasif"}
-                </Badge>
+              <Flex align="center" mb={2}>
+                <Avatar 
+                  size="sm" 
+                  name={stat.studentName} 
+                  src={students.find(s => s.id === stat.studentId)?.photo_url}
+                  bg={studentColors[stat.studentId]}
+                  mr={2}
+                />
+                <Text fontWeight="bold" isTruncated>{stat.studentName}</Text>
               </Flex>
-              <Text>Toplam: <strong>{total}</strong> soru</Text>
-              <Text>Ortalama: <strong>{averages[student.id]}</strong> soru/gün</Text>
-              <Text>Son Hafta: <strong>{lastWeekTotal}</strong> soru</Text>
+              <Stat>
+                <StatLabel color="gray.500">Son 7 Gün</StatLabel>
+                <StatNumber>{stat.weeklyTotal} soru</StatNumber>
+                {stat.changePercentage > 0 ? (
+                  <StatHelpText color="green.500">
+                    <Icon as={FiArrowUp} /> {stat.changePercentage}% artış
+                  </StatHelpText>
+                ) : stat.changePercentage < 0 ? (
+                  <StatHelpText color="red.500">
+                    <Icon as={FiArrowDown} /> {Math.abs(stat.changePercentage)}% azalış
+                  </StatHelpText>
+                ) : (
+                  <StatHelpText color="gray.500">
+                    Değişim yok
+                  </StatHelpText>
+                )}
+              </Stat>
             </Box>
-          );
-        })}
-      </Flex>
+          ))}
+        </SimpleGrid>
+      </Box>
     </Box>
   );
 } 

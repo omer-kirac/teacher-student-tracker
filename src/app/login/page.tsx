@@ -263,26 +263,26 @@ export default function LoginPage() {
                     <Flex mt="8px" mb="5px" justifyContent="space-around" width="55px" position="relative" zIndex="1">
                       <Box 
                         width="12px" 
-                        height={isFocused ? "2px" : "12px"} 
-                        borderRadius={isFocused ? "0" : "full"} 
+                        height={isFocused && !showPassword ? "2px" : "12px"} 
+                        borderRadius={isFocused && !showPassword ? "0" : "full"} 
                         bg="#333"
-                        boxShadow={isFocused ? "none" : "0 2px 3px rgba(0,0,0,0.1)"}
+                        boxShadow={isFocused && !showPassword ? "none" : "0 2px 3px rgba(0,0,0,0.1)"}
                         transition="all 0.3s ease"
                         transform={isEmailFocused ? `translateX(${bearLookPosition/2}px)` : "none"}
                       />
                       <Box 
                         width="12px" 
-                        height={isFocused ? "2px" : "12px"} 
-                        borderRadius={isFocused ? "0" : "full"} 
+                        height={isFocused && !showPassword ? "2px" : "12px"} 
+                        borderRadius={isFocused && !showPassword ? "0" : "full"} 
                         bg="#333"
-                        boxShadow={isFocused ? "none" : "0 2px 3px rgba(0,0,0,0.1)"}
+                        boxShadow={isFocused && !showPassword ? "none" : "0 2px 3px rgba(0,0,0,0.1)"}
                         transition="all 0.3s ease"
                         transform={isEmailFocused ? `translateX(${bearLookPosition/2}px)` : "none"}
                       />
                     </Flex>
                     
-                    {/* Bear Hands (covering eyes when password focused) */}
-                    {isFocused && (
+                    {/* Bear Hands (covering eyes when password focused and hidden) */}
+                    {isFocused && !showPassword && (
                       <>
                         {/* Left Hand */}
                         <Box 
@@ -338,7 +338,7 @@ export default function LoginPage() {
                     )}
                     
                     {/* Bear Hands at rest position when not covering eyes */}
-                    {!isFocused && (
+                    {(!isFocused || (isFocused && showPassword)) && (
                       <>
                         {/* Left Hand */}
                         <Box 
