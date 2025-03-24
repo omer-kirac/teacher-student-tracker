@@ -60,6 +60,7 @@ import StudentRanking from '@/components/StudentRanking';
 import React from 'react';
 import { FiUsers, FiCheckCircle } from 'react-icons/fi';
 import EmptyStateIllustration from '@/components/EmptyStateIllustration';
+import Image from 'next/image';
 
 interface Student {
   id: string;
@@ -630,9 +631,11 @@ export default function ClassPage({ params }: { params: { id: string } }) {
                               fontWeight="bold"
                             >
                               {student.photo_url ? (
-                                <img 
+                                <Image 
                                   src={student.photo_url} 
                                   alt={student.name}
+                                  width={32}
+                                  height={32}
                                   style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                 />
                               ) : (
@@ -736,9 +739,11 @@ export default function ClassPage({ params }: { params: { id: string } }) {
                     mr={2}
                     bg={COLORS[students.length % COLORS.length]}
                   >
-                    <img 
+                    <Image 
                       src={URL.createObjectURL(studentPhoto)} 
                       alt="Öğrenci fotoğrafı önizleme"
+                      width={50}
+                      height={50}
                       style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                     />
                   </Box>
@@ -803,9 +808,11 @@ export default function ClassPage({ params }: { params: { id: string } }) {
                         if (selectedStudent) {
                           if (selectedStudent.photo_url) {
                             return (
-                              <img 
+                              <Image 
                                 src={selectedStudent.photo_url} 
                                 alt={selectedStudent.name}
+                                width={32}
+                                height={32}
                                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                               />
                             );
@@ -849,9 +856,11 @@ export default function ClassPage({ params }: { params: { id: string } }) {
                           fontWeight="bold"
                         >
                           {student.photo_url ? (
-                            <img 
+                            <Image 
                               src={student.photo_url} 
                               alt={student.name}
+                              width={32}
+                              height={32}
                               style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                             />
                           ) : (
@@ -930,9 +939,11 @@ export default function ClassPage({ params }: { params: { id: string } }) {
                     mr={2}
                     bg={editingStudent.photo_url ? "transparent" : studentColors[editingStudent.id]}
                   >
-                    <img 
+                    <Image 
                       src={editingStudent.photo_url} 
                       alt="Mevcut fotoğraf"
+                      width={50}
+                      height={50}
                       style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                     />
                   </Box>
@@ -958,9 +969,11 @@ export default function ClassPage({ params }: { params: { id: string } }) {
                     mr={2}
                     bg={editingStudent ? studentColors[editingStudent.id] : "gray.400"}
                   >
-                    <img 
+                    <Image 
                       src={URL.createObjectURL(editStudentPhoto)} 
                       alt="Yeni fotoğraf önizleme"
+                      width={50}
+                      height={50}
                       style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                     />
                   </Box>
