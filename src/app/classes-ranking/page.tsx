@@ -40,6 +40,8 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
+import React from 'react';
+import CustomLoader from '@/components/CustomLoader';
 
 interface ClassRankingResult {
   class_id: string;
@@ -71,6 +73,14 @@ export default function ClassesRankingPage() {
   const borderColor = useColorModeValue('gray.200', 'gray.700');
   const headerBg = useColorModeValue('gray.50', 'gray.700');
   const cardBg = useColorModeValue('white', 'gray.800');
+  const hoverBg = useColorModeValue('gray.50', 'gray.700');
+  
+  // Sarı tonları için fonksiyon oluştur
+  const getYellowBg = (index: number) => {
+    return index < 3 ? 
+      useColorModeValue(`yellow.${100 - (index * 25)}`, `yellow.${900 - (index * 100)}`) : 
+      undefined;
+  };
   
   // Verileri getir
   useEffect(() => {
@@ -200,8 +210,8 @@ export default function ClassesRankingPage() {
   
   if (loading) {
     return (
-      <Flex justify="center" align="center" h="calc(100vh - 60px)">
-        <Spinner size="xl" thickness="4px" speed="0.65s" color="blue.500" />
+      <Flex justifyContent="center" alignItems="center" height="80vh">
+        <CustomLoader />
       </Flex>
     );
   }
@@ -349,13 +359,13 @@ export default function ClassesRankingPage() {
                   <Tr 
                     key={cls.id} 
                     _hover={{ 
-                      bg: useColorModeValue('gray.50', 'gray.700'), 
+                      bg: hoverBg, 
                       cursor: 'pointer',
                       transform: 'translateY(-2px)',
                       transition: 'all 0.2s'
                     }}
                     onClick={() => handleClassClick(cls.id)}
-                    bg={index < 3 ? useColorModeValue(`yellow.${100 - (index * 25)}`, `yellow.${900 - (index * 100)}`) : undefined}
+                    bg={getYellowBg(index)}
                   >
                     <Td fontWeight="bold">
                       {index === 0 && '🥇'}

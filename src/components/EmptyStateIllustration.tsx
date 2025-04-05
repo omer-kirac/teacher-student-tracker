@@ -1,8 +1,9 @@
 'use client';
 
-import { Box, Text, Button, VStack, useColorModeValue } from '@chakra-ui/react';
+import { Box, Text, VStack, useColorModeValue } from '@chakra-ui/react';
 import { ReactNode } from 'react';
 import { motion } from 'framer-motion';
+import CustomButton from './CustomButton';
 
 // Create motion components for Chakra UI
 const MotionBox = motion(Box);
@@ -104,29 +105,14 @@ export default function EmptyStateIllustration({
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
-            <Button
-              colorScheme={
-                type === 'class' ? 'blue' : 
-                type === 'student' ? 'purple' : 
-                type === 'solution' ? 'green' : 
-                'blue'
-              }
+            <CustomButton
+              buttonColor="#e50041"
               onClick={onButtonClick}
               size="md"
-              fontWeight="semibold"
               px={6}
-              _hover={{
-                transform: 'translateY(-2px)',
-                boxShadow: 'md',
-              }}
-              _active={{
-                transform: 'translateY(0)',
-                boxShadow: 'none',
-              }}
-              transition="all 0.2s"
             >
               {buttonText}
-            </Button>
+            </CustomButton>
           </MotionBox>
         )}
       </VStack>

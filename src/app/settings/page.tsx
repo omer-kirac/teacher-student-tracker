@@ -35,6 +35,8 @@ import {
 } from '@chakra-ui/react';
 import { ViewIcon, ViewOffIcon, CheckIcon, CloseIcon } from '@chakra-ui/icons';
 import { supabase } from '@/lib/supabase';
+import React from 'react';
+import CustomLoader from '@/components/CustomLoader';
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -276,26 +278,30 @@ export default function SettingsPage() {
   };
   
   // Profil fotoğrafı yükleme
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      
-      if (file.size > 2 * 1024 * 1024) {
-        toast({
-          title: 'Dosya çok büyük',
-          description: 'Profil fotoğrafı 2MB\'dan küçük olmalıdır.',
-          status: 'error',
-          duration: 3000,
-          isClosable: true,
-        });
-        return;
-      }
-      
+  const handleFileSelect = (file: File | null) => {
+    if (!file) {
       setProfileData({
         ...profileData,
-        profile_picture: file,
+        profile_picture: null,
       });
+      return;
     }
+    
+    if (file.size > 2 * 1024 * 1024) {
+      toast({
+        title: 'Dosya çok büyük',
+        description: 'Profil fotoğrafı 2MB\'dan küçük olmalıdır.',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+    
+    setProfileData({
+      ...profileData,
+      profile_picture: file,
+    });
   };
   
   // Inputlardaki değişiklikleri izleme
@@ -317,8 +323,8 @@ export default function SettingsPage() {
 
   if (loading) {
     return (
-      <Flex justify="center" align="center" h="calc(100vh - 60px)">
-        <Spinner size="xl" thickness="4px" speed="0.65s" color="blue.500" />
+      <Flex justifyContent="center" alignItems="center" height="80vh">
+        <CustomLoader />
       </Flex>
     );
   }
@@ -359,7 +365,7 @@ export default function SettingsPage() {
                     accept="image/*"
                     ref={fileInputRef}
                     display="none"
-                    onChange={handleFileChange}
+                    onChange={(e) => handleFileSelect(e.target.files?.[0] || null)}
                   />
                 </Box>
                 

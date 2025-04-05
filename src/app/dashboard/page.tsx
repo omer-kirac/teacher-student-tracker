@@ -54,6 +54,7 @@ import React from 'react';
 import { FiPlus, FiUsers, FiBook, FiBarChart2, FiGrid, FiCheckCircle } from 'react-icons/fi';
 import type { RefObject } from 'react';
 import EmptyStateIllustration from '@/components/EmptyStateIllustration';
+import CustomButton from '@/components/CustomButton';
 
 interface Class {
   id: string;
@@ -61,7 +62,7 @@ interface Class {
   created_at: string;
 }
 
-export default function Dashboard() {
+export default function DashboardPage() {
   // State hooks first
   const [classes, setClasses] = useState<Class[]>([]);
   const [loading, setLoading] = useState(true);
@@ -110,74 +111,45 @@ export default function Dashboard() {
   const centerColor = useColorModeValue('blue.500', 'blue.300');
   const editButtonHoverBg = useColorModeValue('blue.50', 'blue.900');
   const deleteButtonHoverBg = useColorModeValue('red.50', 'red.900');
+  const headerBg = useColorModeValue('blue.700', 'gray.800');
 
   useEffect(() => {
-    const checkSession = async () => {
+    const fetchUserData = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        // Kullanıcı oturumunu kontrol et
+        const { data: sessionData } = await supabase.auth.getSession();
         
-        if (!session) {
-          console.log('No session found, redirecting to login');
+        if (!sessionData.session) {
           router.push('/login');
           return;
         }
-        
-        console.log('User session:', session.user);
-        setUser(session.user);
-        
-        let teacherId = session.user.id;
-        let teacherData = null;
-        
-        // Fetch teacher profile data
-        try {
-          const { data, error } = await supabase
-            .from('teachers')
-            .select('*')
-            .eq('id', teacherId)
-            .single();
-            
-          console.log('Teacher data by ID:', data, 'Error:', error);
-          
-          if (!error && data) {
-            console.log('Teacher profile found by ID:', data);
-            teacherData = data;
-            setTeacherProfile(data);
-          } else {
-            // If teacher not found by id, try looking up by email
-            console.log('Teacher not found by ID, trying by email');
-            const { data: teacherByEmail, error: emailError } = await supabase
-              .from('teachers')
-              .select('*')
-              .eq('email', session.user.email)
-              .single();
-              
-            console.log('Teacher by email:', teacherByEmail, 'Error:', emailError);
-            
-            if (!emailError && teacherByEmail) {
-              console.log('Teacher profile found by email:', teacherByEmail);
-              teacherData = teacherByEmail;
-              teacherId = teacherByEmail.id; // Use the teacher ID from the profile
-              setTeacherProfile(teacherByEmail);
-            } else {
-              console.error('No teacher profile found for this user');
-              toast({
-                title: 'Profil Hatası',
-                description: 'Öğretmen profil bilgileri bulunamadı.',
-                status: 'error',
-                duration: 5000,
-                isClosable: true,
-              });
-            }
-          }
-        } catch (error) {
-          console.error('Error fetching teacher profile:', error);
+
+        // Kullanıcının ID'sini al
+        const userId = sessionData.session.user.id;
+
+        // Kullanıcının öğretmen olup olmadığını kontrol et
+        const { data: teacherData, error: teacherError } = await supabase
+          .from('teachers')
+          .select('*')
+          .eq('id', userId)
+          .single();
+
+        if (teacherError || !teacherData) {
+          // Eğer öğretmen değilse öğrenci sayfasına yönlendir
+          router.push('/students/dashboard');
+          return;
         }
+
+        console.log('User session:', sessionData.session.user);
+        setUser(sessionData.session.user);
+        
+        setTeacherProfile(teacherData);
         
         // Only fetch classes and stats if we have a valid teacherId
-        if (teacherId) {
-          console.log('Fetching data for teacher ID:', teacherId);
-          fetchClasses(teacherId);
-          fetchStats(teacherId);
+        if (teacherData.id) {
+          console.log('Fetching data for teacher ID:', teacherData.id);
+          fetchClasses(teacherData.id);
+          fetchStats(teacherData.id);
         } else {
           console.error('No valid teacher ID found');
           setLoading(false);
@@ -189,8 +161,8 @@ export default function Dashboard() {
       }
     };
 
-    checkSession();
-  }, [router, toast]);
+    fetchUserData();
+  }, [router]);
 
   const fetchStats = async (teacherId: string) => {
     try {
@@ -568,7 +540,7 @@ export default function Dashboard() {
           direction={{ base: 'column', md: 'row' }} 
           justifyContent="space-between" 
           alignItems={{ base: 'flex-start', md: 'center' }}
-          bg="linear-gradient(to right, #2D3748, #1A365D)"
+          bg={headerBg}
           borderRadius="xl"
           p={6}
           color="white"
@@ -576,27 +548,27 @@ export default function Dashboard() {
         >
           <VStack align="flex-start" spacing={0}>
             <Text fontSize="sm" color="gray.300">Hoşgeldiniz,</Text>
-            <Heading size="lg" className="css-5ahwhq">
+            <Heading size="lg">
               {teacherProfile?.full_name || user?.user_metadata?.full_name || 'Öğretmen'}
             </Heading>
             <Text fontSize="sm" color="gray.300" mt={1}>Öğrencilerinizin ilerlemesini takip edin</Text>
           </VStack>
           <HStack mt={{ base: 4, md: 0 }} spacing={4}>
-            <Button 
-              bg="whiteAlpha.200" 
-              _hover={{ bg: 'whiteAlpha.300' }} 
-              rightIcon={<FiUsers />}
+            <CustomButton
+              variant="outline"
+              buttonColorOutline="#1a52cb"
+              leftIcon={<FiUsers />}
               onClick={() => router.push('/students')}
             >
               Öğrenciler
-            </Button>
-            <Button 
-              colorScheme="blue" 
-              rightIcon={<FiPlus />}
+            </CustomButton>
+            <CustomButton
+              buttonColor="#e50041"
+              leftIcon={<FiPlus />}
               onClick={onOpen}
             >
               Yeni Sınıf
-            </Button>
+            </CustomButton>
           </HStack>
         </Flex>
 
@@ -701,17 +673,14 @@ export default function Dashboard() {
           <CardHeader pb={0}>
             <Flex justify="space-between" align="center">
               <Heading size="md">Sınıflarım</Heading>
-              <Button 
-                colorScheme="blue" 
-                size="sm" 
-                onClick={onOpen} 
+              <CustomButton 
+                size="sm"
                 leftIcon={<FiPlus />}
-                _hover={{ transform: 'translateY(-2px)', shadow: 'md' }}
-                _active={{ transform: 'translateY(0)', shadow: 'none' }}
-                transition="all 0.2s"
+                buttonColor="#e50041"
+                onClick={onOpen}
               >
                 Yeni Sınıf
-              </Button>
+              </CustomButton>
             </Flex>
           </CardHeader>
           <CardBody>
@@ -759,31 +728,29 @@ export default function Dashboard() {
                         </VStack>
                       </HStack>
                       <HStack spacing={2}>
-                        <Button 
-                          size="xs" 
-                          colorScheme="blue"
-                          variant="ghost"
-                          onClick={(e) => {
+                        <CustomButton 
+                          size="sm"
+                          variant="outline"
+                          buttonColorOutline="#1a52cb"
+                          onClick={(e: React.MouseEvent) => {
                             e.stopPropagation();
                             handleEditClass(cls);
                           }}
-                          _hover={{ bg: editButtonHoverBg }}
                         >
                           Düzenle
-                        </Button>
-                        <Button 
-                          size="xs" 
-                          colorScheme="red"
-                          variant="ghost"
-                          onClick={(e) => {
+                        </CustomButton>
+                        <CustomButton 
+                          size="sm"
+                          variant="outline"
+                          buttonColorOutline="#101622"
+                          onClick={(e: React.MouseEvent) => {
                             e.stopPropagation();
                             setSelectedClass(cls);
                             onDeleteDialogOpen();
                           }}
-                          _hover={{ bg: deleteButtonHoverBg }}
                         >
                           Sil
-                        </Button>
+                        </CustomButton>
                       </HStack>
                     </Flex>
                   </Box>
@@ -813,12 +780,12 @@ export default function Dashboard() {
           </ModalBody>
 
           <ModalFooter>
-            <Button variant="outline" mr={3} onClick={onClose} borderRadius="lg">
+            <CustomButton variant="outline" mr={3} onClick={onClose} buttonColorOutline="#1a52cb">
               İptal
-            </Button>
-            <Button colorScheme="blue" onClick={handleCreateClass} borderRadius="lg">
+            </CustomButton>
+            <CustomButton buttonColor="#e50041" onClick={handleCreateClass}>
               Oluştur
-            </Button>
+            </CustomButton>
           </ModalFooter>
         </ModalContent>
       </Modal>
@@ -842,12 +809,12 @@ export default function Dashboard() {
           </ModalBody>
 
           <ModalFooter>
-            <Button variant="outline" mr={3} onClick={onEditClassModalClose} borderRadius="lg">
+            <CustomButton variant="outline" mr={3} onClick={onEditClassModalClose} buttonColorOutline="#1a52cb">
               İptal
-            </Button>
-            <Button colorScheme="blue" onClick={handleUpdateClass} borderRadius="lg">
+            </CustomButton>
+            <CustomButton buttonColor="#e50041" onClick={handleUpdateClass}>
               Güncelle
-            </Button>
+            </CustomButton>
           </ModalFooter>
         </ModalContent>
       </Modal>
@@ -874,12 +841,12 @@ export default function Dashboard() {
             </AlertDialogBody>
 
             <AlertDialogFooter>
-              <Button ref={cancelRef} onClick={onDeleteDialogClose} borderRadius="lg">
+              <CustomButton variant="outline" buttonColorOutline="#1a52cb" onClick={onDeleteDialogClose} borderRadius="lg">
                 İptal
-              </Button>
-              <Button colorScheme="red" onClick={handleDeleteClass} ml={3} borderRadius="lg">
+              </CustomButton>
+              <CustomButton buttonColor="#e50041" onClick={handleDeleteClass} ml={3}>
                 Sil
-              </Button>
+              </CustomButton>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialogOverlay>

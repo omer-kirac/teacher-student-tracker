@@ -45,6 +45,8 @@ import {
   AreaChart,
   Area,
 } from 'recharts';
+import React from 'react';
+import CustomLoader from '@/components/CustomLoader';
 
 interface Student {
   id: string;
@@ -88,6 +90,7 @@ export default function PerformanceAnalysis() {
   const cardBg = useColorModeValue('white', 'gray.800');
   const textColor = useColorModeValue('gray.800', 'gray.100');
   const borderColor = useColorModeValue('gray.200', 'gray.700');
+  const theadBg = useColorModeValue('gray.50', 'gray.700');
   
   // Kullanıcı kontrolü ve verileri getir
   useEffect(() => {
@@ -341,8 +344,8 @@ export default function PerformanceAnalysis() {
   
   if (loading) {
     return (
-      <Flex justify="center" align="center" h="calc(100vh - 60px)">
-        <Spinner size="xl" thickness="4px" speed="0.65s" color="blue.500" />
+      <Flex justifyContent="center" alignItems="center" height="80vh">
+        <CustomLoader />
       </Flex>
     );
   }
@@ -477,7 +480,7 @@ export default function PerformanceAnalysis() {
               {solutions.length > 0 ? (
                 <Box maxHeight="300px" overflowY="auto">
                   <Box as="table" width="100%" borderWidth="1px" borderRadius="md">
-                    <Box as="thead" bg={useColorModeValue('gray.50', 'gray.700')}>
+                    <Box as="thead" bg={theadBg}>
                       <Box as="tr">
                         <Box as="th" p={3} textAlign="left">Tarih</Box>
                         <Box as="th" p={3} textAlign="right">Çözülen Soru</Box>

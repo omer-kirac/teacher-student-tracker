@@ -13,6 +13,8 @@ import {
   ReferenceLine,
   AreaChart,
   Area,
+  BarChart,
+  Bar,
 } from 'recharts';
 import { 
   Box, 
@@ -54,6 +56,8 @@ interface Solution {
 interface ChartProps {
   students: Student[];
   solutions: Solution[];
+  hideControls?: boolean;
+  chartType?: 'line' | 'area' | 'bar';
 }
 
 // Tutarlı renk oluşturur - her öğrenci için benzersiz ama tutarlı renk
@@ -170,9 +174,17 @@ const CustomTooltip = ({ active, payload, label, students = [] }: CustomTooltipP
   return null;
 };
 
-export default function SolutionsChart({ students, solutions }: ChartProps) {
+export default function SolutionsChart({ 
+  students, 
+  solutions, 
+  hideControls = false,
+  chartType: externalChartType 
+}: ChartProps) {
   const [timeFrame, setTimeFrame] = useState<'all' | '30days' | '7days'>('all');
-  const [chartType, setChartType] = useState<'line' | 'area'>('line');
+  const [internalChartType, setInternalChartType] = useState<'line' | 'area' | 'bar'>('line');
+  
+  // Use external chart type if provided, otherwise use internal state
+  const chartType = externalChartType || internalChartType;
   
   // Remove the global window assignment
   // if (typeof window !== 'undefined') {
@@ -317,48 +329,58 @@ export default function SolutionsChart({ students, solutions }: ChartProps) {
       p={4}
       bg={chartBg}
       borderColor={chartBorder}
+      height="500px"
+      display="flex"
+      flexDirection="column"
     >
       <Flex justify="space-between" align="center" mb={6}>
         <Heading size="md" color={textColor}>Çözüm Grafiği</Heading>
-        <Flex gap={4}>
-          <Select 
-            value={timeFrame} 
-            onChange={(e) => setTimeFrame(e.target.value as any)}
-            width="160px"
-            borderColor={chartBorder}
-            _hover={{ borderColor: 'blue.400' }}
-            transition="all 0.2s"
-          >
-            <option value="all">Tüm Zamanlar</option>
-            <option value="30days">Son 30 Gün</option>
-            <option value="7days">Son 7 Gün</option>
-          </Select>
-          
-          <ButtonGroup size="sm" isAttached variant="outline">
-            <Button
-              colorScheme={chartType === 'line' ? 'blue' : 'gray'}
-              onClick={() => setChartType('line')}
-              _hover={{ transform: 'translateY(-1px)' }}
+        {!hideControls && (
+          <Flex gap={4}>
+            <Select 
+              value={timeFrame} 
+              onChange={(e) => setTimeFrame(e.target.value as any)}
+              width="160px"
+              borderColor={chartBorder}
+              _hover={{ borderColor: 'blue.400' }}
               transition="all 0.2s"
             >
-              Çizgi
-            </Button>
-            <Button
-              colorScheme={chartType === 'area' ? 'blue' : 'gray'}
-              onClick={() => setChartType('area')}
-              _hover={{ transform: 'translateY(-1px)' }}
-              transition="all 0.2s"
-            >
-              Alan
-            </Button>
-          </ButtonGroup>
-        </Flex>
+              <option value="all">Tüm Zamanlar</option>
+              <option value="30days">Son 30 Gün</option>
+              <option value="7days">Son 7 Gün</option>
+            </Select>
+            
+            <ButtonGroup size="sm" isAttached variant="outline">
+              <Button
+                colorScheme={chartType === 'line' ? 'blue' : 'gray'}
+                onClick={() => setInternalChartType('line')}
+                _hover={{ transform: 'translateY(-1px)' }}
+                transition="all 0.2s"
+              >
+                Çizgi
+              </Button>
+              <Button
+                colorScheme={chartType === 'area' ? 'blue' : 'gray'}
+                onClick={() => setInternalChartType('area')}
+                _hover={{ transform: 'translateY(-1px)' }}
+                transition="all 0.2s"
+              >
+                Alan
+              </Button>
+              <Button
+                colorScheme={chartType === 'bar' ? 'blue' : 'gray'}
+                onClick={() => setInternalChartType('bar')}
+                _hover={{ transform: 'translateY(-1px)' }}
+                transition="all 0.2s"
+              >
+                Sütun
+              </Button>
+            </ButtonGroup>
+          </Flex>
+        )}
       </Flex>
       
-      <Box
-        height="400px" 
-        mb={6}
-      >
+      <Box flex="1">
         <ResponsiveContainer width="100%" height="100%">
           {chartType === 'line' ? (
             <LineChart
@@ -408,7 +430,7 @@ export default function SolutionsChart({ students, solutions }: ChartProps) {
                 )
               )}
             </LineChart>
-          ) : (
+          ) : chartType === 'area' ? (
             <AreaChart
               data={chartData}
               margin={{ top: 10, right: 30, left: 0, bottom: 5 }}
@@ -442,6 +464,38 @@ export default function SolutionsChart({ students, solutions }: ChartProps) {
                 />
               ))}
             </AreaChart>
+          ) : (
+            <BarChart
+              data={chartData}
+              margin={{ top: 10, right: 30, left: 0, bottom: 5 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
+              <XAxis 
+                dataKey="date" 
+                tick={{ fill: textColor }}
+                tickMargin={10}
+                stroke={chartBorder}
+              />
+              <YAxis 
+                tick={{ fill: textColor }}
+                tickMargin={10}
+                domain={[0, 'auto']}
+                allowDataOverflow={false}
+                stroke={chartBorder}
+              />
+              <Tooltip content={<CustomTooltip students={students} />} />
+              <Legend content={<CustomLegend students={students} studentColors={studentColors} />} height={60} />
+              {students.map((student) => (
+                <Bar
+                  key={student.id}
+                  dataKey={student.id}
+                  fill={studentColors[student.id]}
+                  name={student.id}
+                  radius={[2, 2, 0, 0]}
+                  stackId={student.id}
+                />
+              ))}
+            </BarChart>
           )}
         </ResponsiveContainer>
       </Box>
@@ -454,52 +508,52 @@ export default function SolutionsChart({ students, solutions }: ChartProps) {
         pt={6}
       >
         <Heading size="md" mb={4} color={textColor}>Haftalık İstatistikler</Heading>
-        <SimpleGrid columns={{ base: 1, md: 3 }} spacing={6}>
-          {weeklyStats.map((stat, index) => (
-            <Box
+        <Flex wrap="wrap" gap={4} justifyContent="space-between">
+          {weeklyStats.slice(0, 4).map((stat, index) => (
+            <Flex 
               key={stat.studentId}
-              borderWidth="1px"
-              borderRadius="lg"
-              p={4}
+              borderWidth="1px" 
+              borderRadius="lg" 
+              p={3} 
               borderColor={chartBorder}
               bg={chartBg}
+              align="center"
+              minWidth="220px"
+              flex="1"
               _hover={{ 
-                transform: 'translateY(-5px)', 
-                boxShadow: 'md', 
+                transform: 'translateY(-2px)', 
+                boxShadow: 'sm', 
                 borderColor: studentColors[stat.studentId]
               }}
               transition="all 0.2s"
             >
-              <Flex align="center" mb={2}>
-                <Avatar 
-                  size="sm" 
-                  name={stat.studentName} 
-                  src={students.find(s => s.id === stat.studentId)?.photo_url}
-                  bg={studentColors[stat.studentId]}
-                  mr={2}
-                />
-                <Text fontWeight="bold" isTruncated>{stat.studentName}</Text>
-              </Flex>
-              <Stat>
-                <StatLabel color="gray.500">Son 7 Gün</StatLabel>
-                <StatNumber>{stat.weeklyTotal} soru</StatNumber>
+              <Avatar 
+                size="md" 
+                name={stat.studentName} 
+                src={students.find(s => s.id === stat.studentId)?.photo_url}
+                bg={studentColors[stat.studentId]}
+                mr={3}
+              />
+              <Box>
+                <Text fontWeight="bold" fontSize="sm" isTruncated mb={1}>{stat.studentName}</Text>
+                <Text fontSize="sm" color="gray.500">Son 7 gün: <Text as="span" fontWeight="bold">{stat.weeklyTotal}</Text> soru</Text>
                 {stat.changePercentage > 0 ? (
-                  <StatHelpText color="green.500">
+                  <Text fontSize="xs" color="green.500">
                     <Icon as={FiArrowUp} /> {stat.changePercentage}% artış
-                  </StatHelpText>
+                  </Text>
                 ) : stat.changePercentage < 0 ? (
-                  <StatHelpText color="red.500">
+                  <Text fontSize="xs" color="red.500">
                     <Icon as={FiArrowDown} /> {Math.abs(stat.changePercentage)}% azalış
-                  </StatHelpText>
+                  </Text>
                 ) : (
-                  <StatHelpText color="gray.500">
+                  <Text fontSize="xs" color="gray.500">
                     Değişim yok
-                  </StatHelpText>
+                  </Text>
                 )}
-              </Stat>
-            </Box>
+              </Box>
+            </Flex>
           ))}
-        </SimpleGrid>
+        </Flex>
       </Box>
     </Box>
   );

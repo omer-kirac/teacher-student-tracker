@@ -10,6 +10,7 @@
   --border-radius: 0.5rem;
   --font-size-base: 16px;
   --transition-speed: 0.2s;
+  --text-secondary: #4a5568;
 }
 
 @theme inline {
@@ -29,6 +30,7 @@ html[data-theme="dark"] {
   --card-bg: #1f2937 !important; /* gray.800 */
   --card-border: #374151 !important; /* gray.700 */
   --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.3) !important;
+  --text-secondary: #a0aec0 !important; /* gray.400 */
 }
 
 /* System dark mode desteği */
@@ -170,6 +172,18 @@ main,
   }
 }
 
+/* Özel loader animasyonu için stil geçersiz kılmaları */
+.custom-loader-container {
+  z-index: 9999;
+}
+
+.custom-loader-container .custom-loader,
+.custom-loader-container .ring {
+  animation-play-state: running !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
 /* Chakra UI konteynerlerinde ve bileşenlerinde zorunlu arka plan ayarları */
 .dark .chakra-container,
 .dark-mode .chakra-container,
@@ -188,4 +202,204 @@ main,
 [data-theme="dark"] .chakra-ui-dark {
   background-color: var(--background) !important;
   color: var(--foreground) !important;
+}
+
+/* Aydınlık mod için heading-gradient değişkenleri */
+.heading-gradient {
+  color: #000000;
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin-bottom: 1rem;
+  text-align: center;
+  line-height: 1.2;
+  letter-spacing: -0.5px;
+  text-shadow: 0 0 1px rgba(0, 0, 0, 0.1);
+}
+
+.description-text {
+  color: var(--text-secondary);
+  font-size: 1rem;
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+}
+
+@media (min-width: 768px) {
+  .heading-gradient {
+    font-size: 3.5rem;
+  }
+  
+  .description-text {
+    font-size: 1.125rem;
+  }
+}
+
+/* Özel buton stilleri - cssbuttons.io */
+button.stylish-button {
+ position: relative;
+ border: none;
+ background: transparent;
+ padding: 0;
+ cursor: pointer;
+ outline-offset: 4px;
+ transition: filter 250ms;
+ user-select: none;
+ touch-action: manipulation;
+}
+
+.stylish-button .shadow {
+ position: absolute;
+ top: 0;
+ left: 0;
+ width: 100%;
+ height: 100%;
+ border-radius: 12px;
+ background: hsl(0deg 0% 0% / 0.25);
+ will-change: transform;
+ transform: translateY(2px);
+ transition: transform
+    600ms
+    cubic-bezier(.3, .7, .4, 1);
+}
+
+.stylish-button .edge {
+ position: absolute;
+ top: 0;
+ left: 0;
+ width: 100%;
+ height: 100%;
+ border-radius: 12px;
+ background: linear-gradient(
+    to left,
+    hsl(340deg 100% 16%) 0%,
+    hsl(340deg 100% 32%) 8%,
+    hsl(340deg 100% 32%) 92%,
+    hsl(340deg 100% 16%) 100%
+  );
+}
+
+.stylish-button .front {
+ display: block;
+ position: relative;
+ padding: 12px 27px;
+ border-radius: 12px;
+ font-size: 1.1rem;
+ color: white;
+ background: hsl(345deg 100% 47%);
+ will-change: transform;
+ transform: translateY(-4px);
+ transition: transform
+    600ms
+    cubic-bezier(.3, .7, .4, 1);
+}
+
+button.stylish-button:hover {
+ filter: brightness(110%);
+}
+
+button.stylish-button:hover .front {
+ transform: translateY(-6px);
+ transition: transform
+    250ms
+    cubic-bezier(.3, .7, .4, 1.5);
+}
+
+button.stylish-button:active .front {
+ transform: translateY(-2px);
+ transition: transform 34ms;
+}
+
+button.stylish-button:hover .shadow {
+ transform: translateY(4px);
+ transition: transform
+    250ms
+    cubic-bezier(.3, .7, .4, 1.5);
+}
+
+button.stylish-button:active .shadow {
+ transform: translateY(1px);
+ transition: transform 34ms;
+}
+
+button.stylish-button:focus:not(:focus-visible) {
+ outline: none;
+}
+
+/* Renkli varyasyonlar */
+.stylish-button.blue .edge {
+ background: linear-gradient(
+    to left,
+    hsl(210deg 100% 16%) 0%,
+    hsl(210deg 100% 32%) 8%,
+    hsl(210deg 100% 32%) 92%,
+    hsl(210deg 100% 16%) 100%
+  );
+}
+
+.stylish-button.blue .front {
+ background: hsl(210deg 100% 47%);
+}
+
+.stylish-button.green .edge {
+ background: linear-gradient(
+    to left,
+    hsl(120deg 100% 16%) 0%,
+    hsl(120deg 100% 25%) 8%,
+    hsl(120deg 100% 25%) 92%,
+    hsl(120deg 100% 16%) 100%
+  );
+}
+
+.stylish-button.green .front {
+ background: hsl(120deg 100% 33%);
+}
+
+.stylish-button.yellow .edge {
+ background: linear-gradient(
+    to left,
+    hsl(45deg 100% 25%) 0%,
+    hsl(45deg 100% 35%) 8%,
+    hsl(45deg 100% 35%) 92%,
+    hsl(45deg 100% 25%) 100%
+  );
+}
+
+.stylish-button.yellow .front {
+ background: hsl(45deg 100% 45%);
+}
+
+.stylish-button.gray .edge {
+ background: linear-gradient(
+    to left,
+    hsl(0deg 0% 20%) 0%,
+    hsl(0deg 0% 30%) 8%,
+    hsl(0deg 0% 30%) 92%,
+    hsl(0deg 0% 20%) 100%
+  );
+}
+
+.stylish-button.gray .front {
+ background: hsl(0deg 0% 45%);
+}
+
+.stylish-button.small .front {
+ padding: 8px 18px;
+ font-size: 0.9rem;
+}
+
+.stylish-button.icon-button .front {
+ padding: 8px 12px;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+}
+
+/* Karanlık mod için özel değişiklikler */
+.dark .heading-gradient,
+.dark-mode .heading-gradient,
+[data-theme="dark"] .heading-gradient {
+  color: transparent;
+  background: linear-gradient(to right, #4299e1, #9f7aea);
+  background-clip: text;
+  -webkit-background-clip: text;
+  text-shadow: 0 0 1px rgba(255, 255, 255, 0.1);
 }

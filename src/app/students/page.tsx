@@ -29,6 +29,8 @@ import {
 } from '@chakra-ui/react';
 import { SearchIcon, TriangleDownIcon, TriangleUpIcon } from '@chakra-ui/icons';
 import { supabase } from '@/lib/supabase';
+import React from 'react';
+import CustomLoader from '@/components/CustomLoader';
 
 interface Student {
   id: string;
@@ -66,6 +68,7 @@ export default function StudentsPage() {
   const bg = useColorModeValue('white', 'gray.800');
   const borderColor = useColorModeValue('gray.200', 'gray.700');
   const headerBg = useColorModeValue('gray.50', 'gray.700');
+  const hoverBg = useColorModeValue('gray.50', 'gray.700');
   
   // Öğretmen ve sınıfları kontrol et
   useEffect(() => {
@@ -252,8 +255,8 @@ export default function StudentsPage() {
 
   if (loading) {
     return (
-      <Flex justify="center" align="center" h="calc(100vh - 60px)">
-        <Spinner size="xl" thickness="4px" speed="0.65s" color="blue.500" />
+      <Flex justifyContent="center" alignItems="center" height="80vh">
+        <CustomLoader />
       </Flex>
     );
   }
@@ -316,7 +319,7 @@ export default function StudentsPage() {
               {filteredStudents.map((student, index) => (
                 <Tr 
                   key={student.id} 
-                  _hover={{ bg: useColorModeValue('gray.50', 'gray.700'), cursor: 'pointer' }}
+                  _hover={{ bg: hoverBg, cursor: 'pointer' }}
                   onClick={() => handleStudentClick(student.id, student.class_id)}
                 >
                   <Td fontWeight="bold">{index + 1}</Td>

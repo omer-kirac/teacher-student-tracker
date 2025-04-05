@@ -56,6 +56,7 @@ export default function RegisterPage() {
   const [shake, setShake] = useState(false);
   const [formActive, setFormActive] = useState(false);
   const [bearLookPosition, setBearLookPosition] = useState(0);
+  const [userType, setUserType] = useState('teacher'); // 'teacher' veya 'student'
   const emailInputRef = useRef<HTMLInputElement>(null);
   const nameInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
@@ -108,19 +109,38 @@ export default function RegisterPage() {
       if (authError) throw authError;
 
       if (authData && authData.user) {
-        const { error: profileError } = await supabase
-          .from('teachers')
-          .insert([
-            {
-              id: authData.user.id,
-              email,
-              full_name: fullName,
-              password_hash: 'secure_placeholder'
-            },
-          ]);
+        let profileError;
+
+        if (userType === 'teacher') {
+          // Öğretmen kaydı
+          const { error } = await supabase
+            .from('teachers')
+            .insert([
+              {
+                id: authData.user.id,
+                email,
+                full_name: fullName,
+                password_hash: 'secure_placeholder'
+              },
+            ]);
+          profileError = error;
+        } else {
+          // Öğrenci kaydı
+          const { error } = await supabase
+            .from('students')
+            .insert([
+              {
+                id: authData.user.id,
+                email,
+                name: fullName,
+                password_hash: 'secure_placeholder'
+              },
+            ]);
+          profileError = error;
+        }
 
         if (profileError) {
-          console.error('Teachers insert error:', profileError);
+          console.error(`${userType} insert error:`, profileError);
           throw profileError;
         }
 
@@ -459,14 +479,34 @@ export default function RegisterPage() {
           </Box>
         </Box>
         
-        <form onSubmit={handleRegister} style={{ width: '100%' }}>
-          <VStack spacing={4}>
-            <FormControl 
-              isRequired
-              opacity={formActive ? 1 : 0}
-              transform={formActive ? "none" : "translateY(20px)"}
-              transition="all 0.5s ease 0.1s"
-            >
+        <FormControl as="form" onSubmit={handleRegister}>
+          <VStack spacing={4} align="stretch">
+            {/* Kullanıcı Tipi Seçimi */}
+            <FormControl>
+              <FormLabel fontWeight="medium">Üyelik Tipi</FormLabel>
+              <Flex>
+                <Button 
+                  flex="1"
+                  mr={2}
+                  colorScheme={userType === 'teacher' ? 'blue' : 'gray'}
+                  onClick={() => setUserType('teacher')}
+                  variant={userType === 'teacher' ? 'solid' : 'outline'}
+                >
+                  Öğretmen
+                </Button>
+                <Button 
+                  flex="1"
+                  colorScheme={userType === 'student' ? 'green' : 'gray'}
+                  onClick={() => setUserType('student')}
+                  variant={userType === 'student' ? 'solid' : 'outline'}
+                >
+                  Öğrenci
+                </Button>
+              </Flex>
+            </FormControl>
+
+            {/* İsim alanı */}
+            <FormControl id="fullName" isRequired>
               <FormLabel fontSize="sm" color="gray.600">Ad Soyad</FormLabel>
               <Input
                 ref={nameInputRef}
@@ -490,12 +530,8 @@ export default function RegisterPage() {
               />
             </FormControl>
             
-            <FormControl 
-              isRequired
-              opacity={formActive ? 1 : 0}
-              transform={formActive ? "none" : "translateY(20px)"}
-              transition="all 0.5s ease 0.2s"
-            >
+            {/* Email alanı */}
+            <FormControl id="email" isRequired>
               <FormLabel fontSize="sm" color="gray.600">Email</FormLabel>
               <Input
                 ref={emailInputRef}
@@ -521,12 +557,8 @@ export default function RegisterPage() {
               />
             </FormControl>
             
-            <FormControl 
-              isRequired
-              opacity={formActive ? 1 : 0}
-              transform={formActive ? "none" : "translateY(20px)"}
-              transition="all 0.5s ease 0.3s"
-            >
+            {/* Şifre alanı */}
+            <FormControl id="password" isRequired>
               <FormLabel fontSize="sm" color="gray.600">Şifre</FormLabel>
               <InputGroup>
                 <Input
@@ -559,44 +591,24 @@ export default function RegisterPage() {
                 </InputRightElement>
               </InputGroup>
             </FormControl>
-            
+
             <Button
+              mt={4}
+              colorScheme={userType === 'teacher' ? 'blue' : 'green'}
+              w="100%"
               type="submit"
-              bg="black"
-              color="white"
-              width="100%"
               isLoading={loading}
-              _hover={{ bg: "gray.800", transform: "translateY(-2px)" }}
-              _active={{ bg: "gray.700", transform: "translateY(0)" }}
-              borderRadius="md"
-              mt={2}
-              opacity={formActive ? 1 : 0}
-              transform={formActive ? "none" : "translateY(20px)"}
-              transition="all 0.5s ease 0.4s, transform 0.2s ease, background 0.2s ease"
-              boxShadow="0px 4px 10px rgba(0, 0, 0, 0.1)"
+              loadingText="Kaydoluyor..."
+              fontWeight="semibold"
             >
-              Kayıt Ol
+              {userType === 'teacher' ? 'Öğretmen Kaydı Oluştur' : 'Öğrenci Kaydı Oluştur'}
             </Button>
+
+            <Text align="center" fontSize="sm" color="gray.600">
+              Zaten hesabınız var mı? <Link href="/login" color="blue.500">Giriş Yapın</Link>
+            </Text>
           </VStack>
-        </form>
-        
-        <Text 
-          fontSize="sm" 
-          color="gray.500"
-          opacity={formActive ? 1 : 0}
-          transform={formActive ? "none" : "translateY(20px)"}
-          transition="all 0.5s ease 0.5s"
-        >
-          Zaten hesabınız var mı?{' '}
-          <Link 
-            href="/login" 
-            color="blue.500"
-            _hover={{ textDecoration: "underline" }}
-            transition="color 0.2s ease"
-          >
-            Giriş Yap
-          </Link>
-        </Text>
+        </FormControl>
       </VStack>
     </Box>
   );

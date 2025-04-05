@@ -187,8 +187,10 @@ export default function Navbar() {
             </HStack>
             
             {/* User section */}
-            <HStack spacing={4}>
-              <ThemeSwitcher />
+            <HStack spacing={3}>
+              <Box display="flex" alignItems="center" mr={1}>
+                <ThemeSwitcher />
+              </Box>
               
               {/* Notification Icon */}
               <Tooltip label="Bildirimler" hasArrow placement="bottom">
@@ -357,6 +359,7 @@ const MobileNavItem = ({ label, children, href }: NavItem) => {
   const pathname = usePathname();
   const isActive = pathname?.startsWith(href || '#');
   const activeColor = useColorModeValue('blue.500', 'blue.300');
+  const textColor = useColorModeValue('gray.600', 'gray.200');
 
   return (
     <Stack spacing={4} onClick={children && onToggle}>
@@ -371,7 +374,7 @@ const MobileNavItem = ({ label, children, href }: NavItem) => {
         }}>
         <Text
           fontWeight={600}
-          color={isActive ? activeColor : useColorModeValue('gray.600', 'gray.200')}>
+          color={isActive ? activeColor : textColor}>
           {label}
         </Text>
         {children && (

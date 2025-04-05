@@ -1,14 +1,88 @@
-# Teacher-Student Tracker
+# Öğretmen-Öğrenci Takip Sistemi
 
-A web application for tracking and managing teacher-student relationships and educational progress. Built with Next.js, Chakra UI, and Supabase.
+Öğrencilerin akademik gelişimini takip etmek ve öğretmenlerin sınıf yönetimini kolaylaştırmak için oluşturulmuş web uygulaması.
 
-## Features
+## Önemli Güvenlik Bildirimi
 
-- Teacher and student account management
-- Progress tracking for students
-- Performance analytics and reporting
-- Interactive dashboard
-- Responsive design for all devices
+Bu proje public bir repo olarak yayınlanmıştır. Lütfen aşağıdaki güvenlik önlemlerine dikkat edin:
+
+- `.env.example` dosyasını `.env` olarak kopyalayın ve kendi API anahtarlarınızla doldurun
+- Asla gerçek API anahtarlarını veya hassas bilgileri GitHub'a push etmeyin
+- `.env` dosyası `.gitignore` içinde tanımlıdır ve GitHub'a gönderilmeyecektir
+
+## Genel Özellikler
+
+### Öğretmen Özellikleri
+- Hesap oluşturma ve giriş yapma
+- Sınıf oluşturma ve yönetme
+- Öğrencileri sınıflara davet etme
+- Ödevleri yönetme ve değerlendirme
+- Öğrenci çözümlerini takip etme
+- Sınıf performans analizleri görme
+
+### Öğrenci Özellikleri
+- Hesap oluşturma ve giriş yapma
+- Öğretmen daveti ile sınıflara katılma
+- Ödevleri görüntüleme ve teslim etme
+- Çözdükleri soruları sisteme yükleme
+- Bireysel performans takibi
+
+## Teknik Özellikler
+
+- Next.js tabanlı modern web uygulaması
+- Supabase veritabanı ve kimlik doğrulama
+- ChakraUI ile modern ve responsive tasarım
+- TypeScript ile güçlü tip güvenliği
+- Dosya yükleme ve görüntüleme özellikleri
+
+## Kurulum
+
+1. Projeyi klonlayın:
+   ```bash
+   git clone https://github.com/omer-kirac/teacher-student-tracker.git
+   cd teacher-student-tracker
+   ```
+
+2. Gerekli NPM paketlerini yükleyin:
+   ```bash
+   npm install
+   ```
+
+3. `.env.example` dosyasını `.env` olarak kopyalayın ve gerekli Supabase bilgilerini ekleyin
+
+4. Geliştirme sunucusunu başlatın:
+   ```bash
+   npm run dev
+   ```
+
+5. Tarayıcıda uygulamayı görüntüleyin:
+   ```
+   http://localhost:3000
+   ```
+
+## Veritabanı Şeması
+
+Aşağıdaki tablolar Supabase veritabanında yer alır:
+
+- **teachers**: Öğretmen profilleri
+- **students**: Öğrenci profilleri
+- **classes**: Sınıf bilgileri
+- **assignments**: Ödev bilgileri
+- **student_assignments**: Öğrenci ödev teslimleri
+- **student_solutions**: Öğrenci çözümleri
+
+## Son Güncellemeler
+
+- Ödev yönetim sistemi eklendi
+- Dosya yükleme altyapısı geliştirildi
+- Öğrenci-ödev takip sistemi tamamlandı
+
+## İlerleyen Aşamalarda Eklenecek Özellikler
+
+- Takvim entegrasyonu ve ödev hatırlatıcıları
+- Ebeveyn portalı
+- Gelişmiş analitik ve raporlama araçları
+- PDF formatında rapor çıktıları
 
 ## Tech Stack
 
@@ -16,66 +90,21 @@ A web application for tracking and managing teacher-student relationships and ed
 - **Backend**: Supabase (PostgreSQL)
 - **Authentication**: Supabase Auth
 - **Styling**: Emotion, Chakra UI, TailwindCSS
+- **File Storage**: Base64 encoding (development) / Supabase Storage (production)
 - **Charts**: Recharts
 - **Form Handling**: React Hook Form
 - **Type Safety**: TypeScript
 
-## Prerequisites
+## Katkıda Bulunma
 
-- Node.js 18+
-- npm or Yarn
-- Supabase account
+Katkılarınızı bekliyoruz! Lütfen bir Pull Request göndermekten çekinmeyin.
 
-## Getting Started
+1. Projeyi fork edin
+2. Feature branch'inizi oluşturun (`git checkout -b feature/yeni-ozellik`)
+3. Değişikliklerinizi commit edin (`git commit -m 'Yeni özellik eklendi'`)
+4. Branch'e push edin (`git push origin feature/yeni-ozellik`)
+5. Bir Pull Request açın
 
-1. Clone the repository
-   ```bash
-   git clone https://github.com/omer-kirac/teacher-student-tracker.git
-   cd teacher-student-tracker
-   ```
-
-2. Install dependencies
-   ```bash
-   npm install
-   # or
-   yarn install
-   ```
-
-3. Setup environment variables
-   - Copy `.env.example` to `.env.local`
-   - Fill in your Supabase credentials
-
-4. Run the development server
-   ```bash
-   npm run dev
-   # or
-   yarn dev
-   ```
-
-5. Open [http://localhost:3000](http://localhost:3000) with your browser to see the application.
-
-## Project Structure
-
-- `/src/app`: Next.js app router pages and layouts
-- `/src/components`: Reusable React components
-- `/src/lib`: Utility functions and shared code
-- `/src/db`: Database schemas and type definitions
-- `/public`: Static assets
-
-## Deployment
-
-This application can be deployed on Vercel, Netlify, or any other platform that supports Next.js.
-
-## License
+## Lisans
 
 MIT
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-1. Fork the project
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request

@@ -116,20 +116,36 @@ export default function LoginPage() {
 
       if (error) throw error;
 
-      toast({
-        title: 'Giriş başarılı!',
-        status: 'success',
-        duration: 3000,
-        isClosable: true,
-      });
+      // Kullanıcının tipini kontrol et (öğretmen mi öğrenci mi)
+      const { data: teacherData } = await supabase
+        .from('teachers')
+        .select('id')
+        .eq('id', data.user?.id)
+        .single();
+      
+      const { data: studentData } = await supabase
+        .from('students')
+        .select('id')
+        .eq('id', data.user?.id)
+        .single();
 
-      router.push('/dashboard');
+      if (teacherData) {
+        // Öğretmen ise dashboard'a yönlendir
+        router.push('/dashboard');
+      } else if (studentData) {
+        // Öğrenci ise öğrenci dashboardına yönlendir
+        router.push('/students/dashboard');
+      } else {
+        // Tip belirsiz ise genel dashboard'a yönlendir
+        router.push('/dashboard');
+      }
+      
     } catch (error: any) {
       setShake(true);
       setTimeout(() => setShake(false), 500);
       
       toast({
-        title: 'Hata!',
+        title: 'Giriş Hatası',
         description: error.message,
         status: 'error',
         duration: 3000,
