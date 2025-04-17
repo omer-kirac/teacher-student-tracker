@@ -80,13 +80,14 @@ import React from 'react';
 import { FiUsers, FiCheckCircle, FiArrowLeft, FiEdit, FiTrash2, FiPlus } from 'react-icons/fi';
 import EmptyStateIllustration from '@/components/EmptyStateIllustration';
 import Image from 'next/image';
-import { FaBook, FaUsers, FaClipboardCheck, FaChalkboardTeacher, FaLink, FaTrophy, FaChartLine, FaPlus } from 'react-icons/fa';
+import { FaBook, FaUsers, FaClipboardCheck, FaChalkboardTeacher, FaLink, FaTrophy, FaChartLine, FaPlus, FaCommentAlt } from 'react-icons/fa';
 import { IconType } from 'react-icons';
 import { Teacher, Class } from '@/types';
 import CustomLoader from '@/components/CustomLoader';
 import FileUploader from '@/components/FileUploader';
 import CustomButton from '@/components/CustomButton';
 import GooeyNav from '@/components/GooeyNav';
+import ClassWall from '@/components/ClassWall';
 import type { FocusableElement } from '@chakra-ui/utils';
 
 // Student interface'ini ve diğer tipleri doğrudan tanımlayalım
@@ -642,6 +643,7 @@ export default function ClassDetailsPage({ params }: { params: { id: string } })
               { label: "Çözüm Takibi", href: "#solutions" },
               { label: "Sıralama", href: "#ranking" },
               { label: "Ödevler", href: "#assignments" },
+              { label: "Sınıf Duvarı", href: "#wall" },
             ]}
             animationTime={600}
             pCount={15}
@@ -842,38 +844,32 @@ export default function ClassDetailsPage({ params }: { params: { id: string } })
         <Box display={activeTab === 3 ? 'block' : 'none'}>
           <Card borderRadius="lg" boxShadow="md" bg={cardBg} borderColor={borderColor} borderWidth="1px">
             <Box p={4}>
-              <Flex justify="space-between" align="center" mb={4}>
-                <Heading size="md">Sınıf Ödevleri</Heading>
+              <Flex direction="column" align="center" justify="center" py={8}>
+                <EmptyStateIllustration 
+                  title="Ödev Yok" 
+                  message="Bu sınıfta henüz ödev bulunmuyor" 
+                  icon={<FaBook />} 
+                />
+                <Text fontWeight="medium" mt={4} textAlign="center">
+                  Bu sınıfta henüz ödev bulunmuyor
+                </Text>
                 <CustomButton
-                  leftIcon={<FaPlus />}
+                  mt={4}
                   buttonColor="#e50041"
-                  onClick={() => router.push(`/classes/${classId}/assignments`)}
+                  leftIcon={<FiPlus />}
                 >
-                  Tüm Ödevlere Git
+                  Ödev Ekle
                 </CustomButton>
               </Flex>
-              
-              <Box>
-                {/* Burada ödev listesi gösterilecek veya ödev sayfasına yönlendirme yapılacak */}
-                <Flex direction="column" align="center" justify="center" py={8}>
-                  <EmptyStateIllustration 
-                    title="Ödevler" 
-                    message="Tüm ödevleri görmek ve yönetmek için ödevler sayfasına gidin" 
-                    icon={<FaBook />} 
-                  />
-                  <Text fontWeight="medium" mt={4} textAlign="center">
-                    Bu sınıfa ait ödevleri görüntülemek, düzenlemek ve notlandırmak için
-                  </Text>
-                  <CustomButton
-                    mt={4}
-                    leftIcon={<FaBook />}
-                    buttonColor="#e50041"
-                    onClick={() => router.push(`/classes/${classId}/assignments`)}
-                  >
-                    Ödevler Sayfasına Git
-                  </CustomButton>
-                </Flex>
-              </Box>
+            </Box>
+          </Card>
+        </Box>
+
+        {/* Sınıf Duvarı İçeriği */}
+        <Box display={activeTab === 4 ? 'block' : 'none'}>
+          <Card borderRadius="lg" boxShadow="md" bg={cardBg} borderColor={borderColor} borderWidth="1px">
+            <Box p={4}>
+              <ClassWall classId={classId} />
             </Box>
           </Card>
         </Box>

@@ -1,7 +1,7 @@
 import React, { forwardRef } from 'react';
-import { Box, Text, BoxProps, useColorMode } from '@chakra-ui/react';
+import { Box, Text, BoxProps, useColorMode, Spinner } from '@chakra-ui/react';
 
-interface CustomButtonProps extends BoxProps {
+export interface CustomButtonProps {
   children: React.ReactNode;
   onClick?: (event: React.MouseEvent<HTMLDivElement>) => void;
   leftIcon?: React.ReactElement;
@@ -9,18 +9,25 @@ interface CustomButtonProps extends BoxProps {
   size?: 'sm' | 'md';
   buttonColor?: string;
   buttonColorOutline?: string;
+  _loading?: boolean;
+  isDisabled?: boolean;
 }
 
-const CustomButton = forwardRef<HTMLDivElement, CustomButtonProps>(({ 
-  children, 
-  onClick, 
-  leftIcon, 
-  variant = 'default',
-  size = 'md',
-  buttonColor,
-  buttonColorOutline,
-  ...rest
-}, ref) => {
+const CustomButton = forwardRef<HTMLDivElement, CustomButtonProps & Omit<BoxProps, '_loading'>>((
+  { 
+    children, 
+    onClick, 
+    leftIcon, 
+    variant = 'default',
+    size = 'md',
+    buttonColor,
+    buttonColorOutline,
+    _loading = false,
+    isDisabled = false,
+    ...rest
+  }, 
+  ref
+) => {
   // Hook'u her zaman aynı sırada çağırmamız gerekiyor
   const { colorMode } = useColorMode();
 
@@ -37,6 +44,12 @@ const CustomButton = forwardRef<HTMLDivElement, CustomButtonProps>(({
   const frontColorOutline = buttonColorOutline || "#1a52cb";
   
   const textColor = "white";
+  
+  const disabledStyle = isDisabled ? {
+    opacity: 0.6,
+    cursor: 'not-allowed',
+    filter: 'grayscale(40%)'
+  } : {};
 
   return (
     <Box 
@@ -46,36 +59,39 @@ const CustomButton = forwardRef<HTMLDivElement, CustomButtonProps>(({
       border="none" 
       bg="transparent" 
       p="0" 
-      cursor="pointer" 
+      cursor={isDisabled ? "not-allowed" : "pointer"} 
       outlineOffset="4px" 
       transition="filter 250ms" 
       userSelect="none" 
-      onClick={onClick}
+      onClick={isDisabled ? undefined : onClick}
       {...rest}
       sx={{
-        '&:hover': {
-          filter: 'brightness(110%)',
-        },
-        '&:hover .front': {
-          transform: 'translateY(-6px)',
-          transition: 'transform 250ms cubic-bezier(.3, .7, .4, 1.5)',
-        },
-        '&:active .front': {
-          transform: 'translateY(-2px)',
-          transition: 'transform 34ms',
-        },
-        '&:hover .shadow': {
-          transform: 'translateY(4px)',
-          transition: 'transform 250ms cubic-bezier(.3, .7, .4, 1.5)',
-        },
-        '&:active .shadow': {
-          transform: 'translateY(1px)',
-          transition: 'transform 34ms',
-        },
+        ...(isDisabled ? {} : {
+          '&:hover': {
+            filter: 'brightness(110%)',
+          },
+          '&:hover .front': {
+            transform: 'translateY(-6px)',
+            transition: 'transform 250ms cubic-bezier(.3, .7, .4, 1.5)',
+          },
+          '&:active .front': {
+            transform: 'translateY(-2px)',
+            transition: 'transform 34ms',
+          },
+          '&:hover .shadow': {
+            transform: 'translateY(4px)',
+            transition: 'transform 250ms cubic-bezier(.3, .7, .4, 1.5)',
+          },
+          '&:active .shadow': {
+            transform: 'translateY(1px)',
+            transition: 'transform 34ms',
+          },
+        }),
         '&:focus:not(:focus-visible)': {
           outline: 'none',
         },
-        ...(rest.sx || {})
+        ...(rest.sx || {}),
+        ...disabledStyle
       }}
     >
       <Box 
@@ -90,6 +106,7 @@ const CustomButton = forwardRef<HTMLDivElement, CustomButtonProps>(({
         willChange="transform" 
         transform="translateY(2px)" 
         transition="transform 600ms cubic-bezier(.3, .7, .4, 1)" 
+        opacity={isDisabled ? 0.6 : 1}
       />
       <Box 
         className="edge" 
@@ -100,6 +117,7 @@ const CustomButton = forwardRef<HTMLDivElement, CustomButtonProps>(({
         height="100%" 
         borderRadius="12px" 
         bg={variant === 'outline' ? edgeColorOutline : edgeColorDefault} 
+        opacity={isDisabled ? 0.6 : 1}
       />
       <Box 
         className="front" 
@@ -114,8 +132,9 @@ const CustomButton = forwardRef<HTMLDivElement, CustomButtonProps>(({
         color={textColor}
         bg={variant === 'outline' ? frontColorOutline : frontColorDefault}
         willChange="transform" 
-        transform="translateY(-4px)" 
+        transform={isDisabled ? "translateY(-2px)" : "translateY(-4px)"} 
         transition="transform 600ms cubic-bezier(.3, .7, .4, 1)"
+        opacity={isDisabled ? 0.8 : 1}
         _dark={{
           bg: variant === 'outline' ? frontColorOutline : frontColorDefault,
           color: textColor
@@ -128,7 +147,9 @@ const CustomButton = forwardRef<HTMLDivElement, CustomButtonProps>(({
           }
         }}
       >
-        {leftIcon && (
+        {_loading ? (
+          <Spinner size="sm" color={textColor} mr={children ? 2 : 0} />
+        ) : leftIcon ? (
           <Box mr="2" sx={{ 
             svg: { 
               color: `${textColor} !important`,
@@ -137,7 +158,7 @@ const CustomButton = forwardRef<HTMLDivElement, CustomButtonProps>(({
           }}>
             {leftIcon}
           </Box>
-        )}
+        ) : null}
         <Text className="text" sx={{ color: `${textColor} !important` }}>{children}</Text>
       </Box>
     </Box>
